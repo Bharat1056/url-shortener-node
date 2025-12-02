@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import axiosInstance from './axios';
 
 export interface Link {
   id: number;
@@ -23,36 +23,37 @@ export interface LinksResponse {
   pagination: Pagination;
 }
 
+// Define the structure of our standardized API response
+export interface ApiResponse<T> {
+  statusCode: number;
+  data: T;
+  message: string;
+  success: boolean;
+}
+
 export const api = {
   getLinks: async (page = 1, limit = 10, search = ''): Promise<LinksResponse> => {
-    const res = await fetch(`${BASE_URL}/links?page=${page}&limit=${limit}&search=${search}`);
-    if (!res.ok) throw new Error('Failed to fetch links');
-    return res.json();
+    const response = await axiosInstance.get<ApiResponse<LinksResponse>>(`/links`, {
+      params: { page, limit, search },
+    });
+    return (response as unknown as ApiResponse<LinksResponse>).data;
   },
 
   createLink: async (targetUrl: string, customCode?: string): Promise<Link> => {
-    const res = await fetch(`${BASE_URL}/links`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetUrl, customCode }),
+    const response = await axiosInstance.post<ApiResponse<Link>>('/links', {
+      targetUrl,
+      customCode,
     });
-    if (!res.ok) {
-      if (res.status === 409) throw new Error('Short code already exists');
-      throw new Error('Failed to create link');
-    }
-    return res.json();
+    return (response as unknown as ApiResponse<Link>).data;
   },
 
   deleteLink: async (code: string): Promise<void> => {
-    const res = await fetch(`${BASE_URL}/links/${code}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error('Failed to delete link');
+    await axiosInstance.delete(`/links/${code}`);
   },
 
   getLinkStats: async (code: string): Promise<Link> => {
-    const res = await fetch(`${BASE_URL}/links/${code}`);
-    if (!res.ok) throw new Error('Failed to fetch link stats');
-    return res.json();
+    const response = await axiosInstance.get<ApiResponse<Link>>(`/links/${code}`);
+    return (response as unknown as ApiResponse<Link>).data;
   },
 };
+

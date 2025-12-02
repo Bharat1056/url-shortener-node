@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import axios from "axios";
 
 export default async function RedirectPage({
   params,
@@ -9,29 +10,19 @@ export default async function RedirectPage({
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
   try {
-    const res = await fetch(`${API_URL}/${code}`, {
-      method: "GET",
-      redirect: "manual",
-      cache: "no-store",
+    const response = await axios.get(`${API_URL}/${code}`, {
+      maxRedirects: 0,
+      validateStatus: (status) => status >= 200 && status < 400,
     });
 
-    if (res.status === 404) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <h1 className="text-4xl font-bold mb-4">404 - Link Not Found</h1>
-          <p className="text-muted-foreground">The requested short link does not exist.</p>
-        </div>
-      );
-    }
-
-    if (res.status === 302 || res.status === 301 || res.status === 307 || res.status === 308) {
-      const location = res.headers.get("location");
+    if (response.status === 302 || response.status === 301 || response.status === 307 || response.status === 308) {
+      const location = response.headers["location"];
       if (location) {
         redirect(location);
       }
     }
 
-    // Fallback if no redirect header found
+    // Fallback
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
@@ -39,12 +30,22 @@ export default async function RedirectPage({
       </div>
     );
 
-  } catch (error) {
-    // Next.js redirect throws an error, so we need to re-throw it if it's a redirect error
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+  } catch (error: any) {
+    // Next.js redirect throws an error
+    if (error.message === "NEXT_REDIRECT") {
       throw error;
     }
-    console.error("Redirect error:", error);
+
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-screen">
+            <h1 className="text-4xl font-bold mb-4">404 - Link Not Found</h1>
+            <p className="text-muted-foreground">The requested short link does not exist.</p>
+          </div>
+        );
+      }
+    }
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold mb-4">Error</h1>
@@ -53,3 +54,4 @@ export default async function RedirectPage({
     );
   }
 }
+
