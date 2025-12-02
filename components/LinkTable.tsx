@@ -19,10 +19,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner"
-import { Copy, Trash2, ExternalLink, BarChart2, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Copy, Trash2, ExternalLink, BarChart2, Search, ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function LinkTable() {
   const [links, setLinks] = useState<Link[]>([]);
@@ -31,6 +49,7 @@ export function LinkTable() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchLinks = async () => {
@@ -63,10 +82,10 @@ export function LinkTable() {
     });
   };
 
-  const handleDelete = async (code: string) => {
-    if (!confirm("Are you sure you want to delete this link?")) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
     try {
-      await api.deleteLink(code);
+      await api.deleteLink(deleteId);
       toast("Success", {
         description: "Link deleted successfully",
       });
@@ -75,13 +94,15 @@ export function LinkTable() {
       toast("Error", {
         description: "Failed to delete link",
       });
+    } finally {
+      setDeleteId(null);
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="relative w-72">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search links..."
@@ -90,20 +111,22 @@ export function LinkTable() {
             className="pl-8"
           />
         </div>
-        <Select
-          value={limit.toString()}
-          onValueChange={(val) => setLimit(parseInt(val))}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Rows per page" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="5">5 per page</SelectItem>
-            <SelectItem value="10">10 per page</SelectItem>
-            <SelectItem value="20">20 per page</SelectItem>
-            <SelectItem value="50">50 per page</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Select
+            value={limit.toString()}
+            onValueChange={(val) => setLimit(parseInt(val))}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Rows per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 per page</SelectItem>
+              <SelectItem value="10">10 per page</SelectItem>
+              <SelectItem value="20">20 per page</SelectItem>
+              <SelectItem value="50">50 per page</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="rounded-md border">
@@ -139,7 +162,7 @@ export function LinkTable() {
                       href={`/${link.shortCode}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-blue-600 hover:underline flex items-center gap-1"
+                      className="text-primary hover:underline flex items-center gap-1"
                     >
                       {link.shortCode}
                       <ExternalLink className="h-3 w-3" />
@@ -157,29 +180,34 @@ export function LinkTable() {
                   <TableCell>
                     {formatDistanceToNow(new Date(link.createdAt), { addSuffix: true })}
                   </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => copyToClipboard(link.shortCode)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => router.push(`/code/${link.shortCode}`)}
-                    >
-                      <BarChart2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-600"
-                      onClick={() => handleDelete(link.shortCode)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => copyToClipboard(link.shortCode)}>
+                          <Copy className="mr-2 h-4 w-4" />
+                          Copy Link
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push(`/code/${link.shortCode}`)}>
+                          <BarChart2 className="mr-2 h-4 w-4" />
+                          View Stats
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => setDeleteId(link.shortCode)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))
@@ -214,6 +242,24 @@ export function LinkTable() {
           </Button>
         </div>
       </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the shortened link
+              and remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

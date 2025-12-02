@@ -1,5 +1,11 @@
 import axiosInstance from './axios';
 
+export interface Click {
+  id: number;
+  linkId: number;
+  createdAt: string;
+}
+
 export interface Link {
   id: number;
   shortCode: string;
@@ -7,6 +13,7 @@ export interface Link {
   totalClicks: number;
   lastClicked: string | null;
   createdAt: string;
+  clicks?: Click[];
 }
 
 export interface Pagination {
@@ -29,6 +36,19 @@ export interface ApiResponse<T> {
   data: T;
   message: string;
   success: boolean;
+}
+
+export interface SystemStats {
+  ok: boolean;
+  uptime: {
+    seconds: number;
+    formatted: string;
+    startTime: string;
+  };
+  database: {
+    connected: boolean;
+    responseTime: string;
+  };
 }
 
 export const api = {
@@ -54,6 +74,14 @@ export const api = {
   getLinkStats: async (code: string): Promise<Link> => {
     const response = await axiosInstance.get<ApiResponse<Link>>(`/links/${code}`);
     return (response as unknown as ApiResponse<Link>).data;
+  },
+
+  getSystemStats: async (): Promise<SystemStats> => {
+    // Accessing healthz endpoint which is outside /api
+    const baseURL = axiosInstance.defaults.baseURL || '';
+    const rootURL = baseURL.replace(/\/api$/, '');
+    const response = await axiosInstance.get<SystemStats>(`${rootURL}/healthz`);
+    return response as unknown as SystemStats;
   },
 };
 

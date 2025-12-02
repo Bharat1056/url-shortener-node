@@ -1,13 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { api, Link } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Calendar, MousePointer, Clock } from "lucide-react";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatDistanceToNow, format, startOfDay, subDays, isSameDay } from "date-fns";
 import LinkNext from "next/link";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 
 export default function LinkStats() {
   const { code } = useParams();
@@ -29,6 +37,27 @@ export default function LinkStats() {
     };
     fetchStats();
   }, [code]);
+
+  const chartData = useMemo(() => {
+    if (!link?.clicks) return [];
+
+    // Create an array of the last 7 days
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = subDays(new Date(), 6 - i);
+      return startOfDay(d);
+    });
+
+    return last7Days.map((date) => {
+      const clicksOnDay = link.clicks?.filter((click) =>
+        isSameDay(new Date(click.createdAt), date)
+      ).length || 0;
+
+      return {
+        date: format(date, "MMM dd"),
+        clicks: clicksOnDay,
+      };
+    });
+  }, [link]);
 
   if (loading) {
     return (
@@ -55,8 +84,8 @@ export default function LinkStats() {
   }
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="mb-8">
+    <div className="container mx-auto py-10 px-4 space-y-8">
+      <div>
         <LinkNext href="/">
           <Button variant="outline" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -69,7 +98,7 @@ export default function LinkStats() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
@@ -110,6 +139,45 @@ export default function LinkStats() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Clicks Over Time (Last 7 Days)</CardTitle>
+        </CardHeader>
+        <CardContent className="pl-2">
+          <div className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis
+                  dataKey="date"
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${value}`}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "transparent" }}
+                  contentStyle={{ borderRadius: "8px" }}
+                />
+                <Bar
+                  dataKey="clicks"
+                  fill="currentColor"
+                  radius={[4, 4, 0, 0]}
+                  className="fill-primary"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Link Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -123,7 +191,7 @@ export default function LinkStats() {
                 href={link.targetUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-600 hover:text-blue-800"
+                className="text-primary hover:text-primary/80"
               >
                 <ExternalLink className="h-4 w-4" />
               </a>
@@ -139,7 +207,7 @@ export default function LinkStats() {
                 href={`/${link.shortCode}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-600 hover:text-blue-800"
+                className="text-primary hover:text-primary/80"
               >
                 <ExternalLink className="h-4 w-4" />
               </a>
