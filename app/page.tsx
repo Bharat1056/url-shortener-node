@@ -14,18 +14,6 @@ export default function Home() {
           <div className="flex items-center space-x-2">
             <span className="font-bold text-xl tracking-tight">TinyLink</span>
           </div>
-          <div className="flex items-center">
-            <nav className="flex items-center text-sm font-medium">
-              <a
-                href="https://github.com/Bharat1056/tinylink"
-                target="_blank"
-                rel="noreferrer"
-                className="text-foreground/60 transition-colors hover:text-foreground/80"
-              >
-                GitHub
-              </a>
-            </nav>
-          </div>
         </div>
       </header>
 
