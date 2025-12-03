@@ -6,6 +6,13 @@ export interface Click {
   createdAt: string;
 }
 
+export interface UptimeCheck {
+  id: number;
+  linkId: number;
+  status: 'UP' | 'DOWN';
+  createdAt: string;
+}
+
 export interface Link {
   id: number;
   shortCode: string;
@@ -14,6 +21,7 @@ export interface Link {
   lastClicked: string | null;
   createdAt: string;
   clicks?: Click[];
+  uptimeChecks?: UptimeCheck[];
 }
 
 export interface Pagination {

@@ -2,18 +2,16 @@
 
 import { LinkTable } from "@/components/LinkTable";
 import { CreateLinkModal } from "@/components/CreateLinkModal";
-import { Toaster } from "@/components/ui/sonner";
+
 import { StatsCards } from "@/components/StatsCards";
-import { Link as LinkIcon } from "lucide-react";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background font-sans antialiased">
       {/* Navbar */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex justify-center">
+        <div className="container flex h-14 items-center justify-between">
           <div className="mr-4 flex items-center space-x-2">
-            <LinkIcon className="h-6 w-6" />
             <span className="font-bold text-xl tracking-tight">TinyLink</span>
           </div>
           <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
@@ -64,7 +62,7 @@ export default function Home() {
         </section>
       </main>
 
-      <Toaster />
+
     </div>
   );
 }

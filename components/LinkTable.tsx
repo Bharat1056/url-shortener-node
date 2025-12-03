@@ -41,6 +41,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 export function LinkTable() {
   const [links, setLinks] = useState<Link[]>([]);
@@ -135,6 +136,7 @@ export function LinkTable() {
             <TableRow>
               <TableHead>Short Code</TableHead>
               <TableHead>Target URL</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Clicks</TableHead>
               <TableHead>Last Clicked</TableHead>
               <TableHead>Created</TableHead>
@@ -144,13 +146,13 @@ export function LinkTable() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : links.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No links found
                 </TableCell>
               </TableRow>
@@ -170,6 +172,21 @@ export function LinkTable() {
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate" title={link.targetUrl}>
                     {link.targetUrl}
+                  </TableCell>
+                  <TableCell>
+                    {link.uptimeChecks && link.uptimeChecks.length > 0 ? (
+                      <Badge
+                        className={
+                          link.uptimeChecks[0].status === 'UP'
+                            ? "bg-green-500 hover:bg-green-600 border-transparent text-white"
+                            : "bg-destructive hover:bg-destructive/90 border-transparent text-white"
+                        }
+                      >
+                        {link.uptimeChecks[0].status}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">PENDING</Badge>
+                    )}
                   </TableCell>
                   <TableCell>{link.totalClicks}</TableCell>
                   <TableCell>

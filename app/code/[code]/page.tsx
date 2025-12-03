@@ -16,6 +16,15 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function LinkStats() {
   const { code } = useParams();
@@ -172,6 +181,49 @@ export default function LinkStats() {
                 />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Uptime History (Last 50 Checks)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="max-h-[300px] overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Time</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {link.uptimeChecks?.map((check) => (
+                  <TableRow key={check.id}>
+                    <TableCell>
+                      <Badge
+                        className={
+                          check.status === 'UP'
+                            ? "bg-green-500 hover:bg-green-600 border-transparent text-white"
+                            : "bg-destructive hover:bg-destructive/90 border-transparent text-white"
+                        }
+                      >
+                        {check.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(check.createdAt), "PP pp")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {!link.uptimeChecks?.length && (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center">No uptime checks recorded yet.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
