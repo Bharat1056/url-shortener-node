@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams } from "next/navigation";
 import { api, Link } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,8 +34,12 @@ export default function LinkStats() {
   const [error, setError] = useState("");
   const [chartType, setChartType] = useState<'clicks' | 'uptime'>('clicks');
 
+  const fetchedCodeRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (!code) return;
+    if (!code || fetchedCodeRef.current === code) return;
+    fetchedCodeRef.current = code as string;
+
     const fetchStats = async () => {
       try {
         const data = await api.getLinkStats(code as string);

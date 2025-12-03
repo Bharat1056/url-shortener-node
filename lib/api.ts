@@ -93,6 +93,7 @@ export const api = {
     // Accessing healthz endpoint which is outside /api
     const baseURL = axiosInstance.defaults.baseURL || '';
     const rootURL = baseURL.replace(/\/api$/, '');
+    console.log("base", rootURL)
     const response = await axiosInstance.get<SystemStats>(`${rootURL}/healthz`);
     return response as unknown as SystemStats;
   },

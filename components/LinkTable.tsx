@@ -158,44 +158,44 @@ export function LinkTable() {
               </TableRow>
             ) : (
               links.map((link) => (
-                <TableRow key={link.id}>
+                <TableRow key={link?.id}>
                   <TableCell className="font-medium">
                     <a
-                      href={`/${link.shortCode}`}
+                      href={`/${link?.shortCode}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-primary hover:underline flex items-center gap-1"
                     >
-                      {link.shortCode}
+                      {link?.shortCode}
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate" title={link.targetUrl}>
-                    {link.targetUrl}
+                  <TableCell className="max-w-[200px] truncate" title={link?.targetUrl}>
+                    {link?.targetUrl}
                   </TableCell>
                   <TableCell>
-                    {link.uptimeChecks && link.uptimeChecks.length > 0 ? (
+                    {link?.uptimeChecks && link?.uptimeChecks?.length > 0 ? (
                       <Badge
                         className={
-                          link.uptimeChecks[0].status === 'UP'
+                          link?.uptimeChecks[0]?.status === 'UP'
                             ? "bg-green-500 hover:bg-green-600 border-transparent text-white"
                             : "bg-destructive hover:bg-destructive/90 border-transparent text-white"
                         }
                       >
-                        {link.uptimeChecks[0].status}
+                        {link?.uptimeChecks[0]?.status}
                       </Badge>
                     ) : (
                       <Badge variant="outline">PENDING</Badge>
                     )}
                   </TableCell>
-                  <TableCell>{link.totalClicks}</TableCell>
+                  <TableCell>{link?.totalClicks}</TableCell>
                   <TableCell>
-                    {link.lastClicked
-                      ? formatDistanceToNow(new Date(link.lastClicked), { addSuffix: true })
+                    {link?.lastClicked
+                      ? formatDistanceToNow(new Date(link?.lastClicked), { addSuffix: true })
                       : "-"}
                   </TableCell>
                   <TableCell>
-                    {formatDistanceToNow(new Date(link.createdAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(link?.createdAt), { addSuffix: true })}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
