@@ -27,7 +27,7 @@ export function StatsCards() {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 30000); // Refresh every 30s
+    const interval = setInterval(fetchData, 300000); // Refresh every 30s
     return () => clearInterval(interval);
   }, []);
 

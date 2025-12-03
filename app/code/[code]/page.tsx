@@ -25,12 +25,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function LinkStats() {
   const { code } = useParams();
   const [link, setLink] = useState<Link | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [chartType, setChartType] = useState<'clicks' | 'uptime'>('clicks');
 
   useEffect(() => {
     if (!code) return;
@@ -94,6 +96,17 @@ export default function LinkStats() {
 
   return (
     <div className="container mx-auto py-10 px-4 space-y-8">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold">Link Statistics</h1>
+        <ToggleGroup type="single" value={chartType} onValueChange={(value) => value && setChartType(value as 'clicks' | 'uptime')}>
+          <ToggleGroupItem value="clicks" aria-label="Show clicks">
+            Clicks
+          </ToggleGroupItem>
+          <ToggleGroupItem value="uptime" aria-label="Show uptime">
+            Uptime
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
       <div>
         <LinkNext href="/">
           <Button variant="outline" className="mb-4">
@@ -101,8 +114,7 @@ export default function LinkStats() {
             Back to Dashboard
           </Button>
         </LinkNext>
-        <h1 className="text-3xl font-bold">Link Statistics</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mt-2">
           Stats for <span className="font-mono font-bold">{link.shortCode}</span>
         </p>
       </div>
@@ -146,44 +158,88 @@ export default function LinkStats() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Clicks Over Time (Last 7 Days)</CardTitle>
-        </CardHeader>
-        <CardContent className="pl-2">
-          <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <XAxis
-                  dataKey="date"
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => `${value}`}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  cursor={{ fill: "transparent" }}
-                  contentStyle={{ borderRadius: "8px" }}
-                />
-                <Bar
-                  dataKey="clicks"
-                  fill="currentColor"
-                  radius={[4, 4, 0, 0]}
-                  className="fill-primary"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {chartType === 'clicks' ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Clicks Over Time (Last 7 Days)</CardTitle>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <div className="h-[350px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <XAxis
+                    dataKey="date"
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value}`}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "transparent" }}
+                    contentStyle={{ borderRadius: "8px" }}
+                  />
+                  <Bar
+                    dataKey="clicks"
+                    fill="currentColor"
+                    radius={[4, 4, 0, 0]}
+                    className="fill-primary"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Daily Uptime (Last 7 Days)</CardTitle>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <div className="h-[350px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={link.dailyUptime || []}>
+                  <XAxis
+                    dataKey="date"
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => format(new Date(value), "MMM dd")}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value}%`}
+                    domain={[0, 100]}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "transparent" }}
+                    contentStyle={{ borderRadius: "8px" }}
+                    formatter={(value: number) => [`${value}%`, "Uptime"]}
+                    labelFormatter={(label) => format(new Date(label), "MMM dd, yyyy")}
+                  />
+                  <Bar
+                    dataKey="uptimePercentage"
+                    fill="currentColor"
+                    radius={[4, 4, 0, 0]}
+                    className="fill-green-500"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

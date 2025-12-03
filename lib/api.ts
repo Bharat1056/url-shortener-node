@@ -22,6 +22,11 @@ export interface Link {
   createdAt: string;
   clicks?: Click[];
   uptimeChecks?: UptimeCheck[];
+  dailyUptime?: {
+    date: string;
+    uptimePercentage: number;
+    totalChecks: number;
+  }[];
 }
 
 export interface Pagination {
