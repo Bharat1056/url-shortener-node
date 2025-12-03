@@ -26,6 +26,8 @@ export interface Link {
     date: string;
     uptimePercentage: number;
     totalChecks: number;
+    upChecks: number;
+    downChecks: number;
   }[];
 }
 

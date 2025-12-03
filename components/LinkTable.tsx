@@ -179,7 +179,7 @@ export function LinkTable() {
                         className={
                           link?.uptimeChecks[0]?.status === 'UP'
                             ? "bg-green-500 hover:bg-green-600 border-transparent text-white"
-                            : "bg-destructive hover:bg-destructive/90 border-transparent text-white"
+                            : "bg-red-500 hover:bg-red-600 border-transparent text-white"
                         }
                       >
                         {link?.uptimeChecks[0]?.status}

@@ -9,13 +9,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background font-sans antialiased">
       {/* Navbar */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex justify-center">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex justify-center px-4">
         <div className="container flex h-14 items-center justify-between">
-          <div className="mr-4 flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <span className="font-bold text-xl tracking-tight">TinyLink</span>
           </div>
-          <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-            <nav className="flex items-center space-x-6 text-sm font-medium">
+          <div className="flex items-center">
+            <nav className="flex items-center text-sm font-medium">
               <a
                 href="https://github.com/Bharat1056/tinylink"
                 target="_blank"

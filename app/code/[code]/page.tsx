@@ -15,6 +15,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
 } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ChartToggle } from "@/components/ChartToggle";
 
 export default function LinkStats() {
   const { code } = useParams();
@@ -74,6 +75,11 @@ export default function LinkStats() {
     });
   }, [link]);
 
+  const uptimeChartData = useMemo(() => {
+    if (!link?.dailyUptime) return [];
+    return link.dailyUptime;
+  }, [link?.dailyUptime]);
+
   if (loading) {
     return (
       <div className="container mx-auto py-10 px-4 flex justify-center">
@@ -102,14 +108,6 @@ export default function LinkStats() {
     <div className="container mx-auto py-10 px-4 space-y-8">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">Link Statistics</h1>
-        <ToggleGroup type="single" value={chartType} onValueChange={(value) => value && setChartType(value as 'clicks' | 'uptime')}>
-          <ToggleGroupItem value="clicks" aria-label="Show clicks">
-            Clicks
-          </ToggleGroupItem>
-          <ToggleGroupItem value="uptime" aria-label="Show uptime">
-            Uptime
-          </ToggleGroupItem>
-        </ToggleGroup>
       </div>
       <div>
         <LinkNext href="/">
@@ -162,6 +160,10 @@ export default function LinkStats() {
         </Card>
       </div>
 
+      <div className="flex justify-end">
+        <ChartToggle value={chartType} onChange={setChartType} />
+      </div>
+
       {chartType === 'clicks' ? (
         <Card>
           <CardHeader>
@@ -209,7 +211,7 @@ export default function LinkStats() {
           <CardContent className="pl-2">
             <div className="h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={link.dailyUptime || []}>
+                <BarChart data={uptimeChartData}>
                   <XAxis
                     dataKey="date"
                     stroke="#888888"
@@ -223,20 +225,27 @@ export default function LinkStats() {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `${value}%`}
-                    domain={[0, 100]}
+                    allowDecimals={false}
                   />
                   <Tooltip
                     cursor={{ fill: "transparent" }}
                     contentStyle={{ borderRadius: "8px" }}
-                    formatter={(value: number) => [`${value}%`, "Uptime"]}
                     labelFormatter={(label) => format(new Date(label), "MMM dd, yyyy")}
                   />
+                  <Legend />
                   <Bar
-                    dataKey="uptimePercentage"
-                    fill="currentColor"
+                    dataKey="upChecks"
+                    name="Successful Checks"
+                    stackId="a"
+                    fill="#22c55e"
+                    radius={[0, 0, 4, 4]}
+                  />
+                  <Bar
+                    dataKey="downChecks"
+                    name="Failed Checks"
+                    stackId="a"
+                    fill="#ef4444"
                     radius={[4, 4, 0, 0]}
-                    className="fill-green-500"
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -266,7 +275,7 @@ export default function LinkStats() {
                         className={
                           check.status === 'UP'
                             ? "bg-green-500 hover:bg-green-600 border-transparent text-white"
-                            : "bg-destructive hover:bg-destructive/90 border-transparent text-white"
+                            : "bg-red-500 hover:bg-red-600 border-transparent text-white"
                         }
                       >
                         {check.status}
